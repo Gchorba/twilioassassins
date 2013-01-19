@@ -91,8 +91,42 @@ def assign(killer, kille):
             )
 
 def join_game(number, game_name):
-  # check to make sure number isnt in game
-  return True
+  try:
+    # See if we already have player in the database
+    cursor.execute("SELECT name FROM player WHERE phonenumber =:num", {"num" : number})
+    playername = cursor.fetchone()
+
+    # See if game exists in database
+    cursor.execute("SELECT name FROM game WHERE name =:name", {"name" : game_name})
+    game = cursor.fetchone()
+    if (game == None):
+      raise FailJoin("Game does not exist")
+
+    # Add player to player table if not already exists
+    if (playername == None):
+      cursor.execute("INSERT INTO player VALUES (?,'', '', 0)", number)
+      conn.commit()
+
+    # Check if the player is already in the game
+    cursor.execute("SELECT name FROM game_player WHERE name = ? AND phonenumber = ?", playername, game_name)
+    already_in_game = cursor.fetchone()
+    if not already_in_game == None:
+      raise FailJoin("Player already registered in game")
+
+    # Add player to the game
+    cursor.execute("INSERT INTO game_player VALUES (?, ?, 1, '')", game_name, number)
+    conn.commit()
+  except sqlite3.OperationalError, msg:
+    print msg
+    raise FailJoin("Database error")
+  return playername
+
+# Exceptions
+class FailJoin(Exception):
+  def __init__(self, value):
+    self.value = value
+  def __str__(self):
+    return repr(self.value)
 
 if __name__ == "__main__":
   conn = sqlite3.connect(config.db_filename)
