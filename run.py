@@ -57,10 +57,12 @@ def join_game(number, game_name):
       conn.commit()
 
     # Check if the player is already in the game
-    cursor.execute("SELECT name FROM game_player WHERE name = ? AND phonenumber = ?", playername, game_name)
+    cursor.execute("SELECT name FROM game_player
+                    LEFT JOIN game ON game_player.name = game.name
+                    WHERE phonenumber = ? AND game.completed = 0", number)
     already_in_game = cursor.fetchone()
     if not already_in_game == None:
-      raise FailJoin("Player already registered in game")
+      raise FailJoin("Player already registered in a game that is not complete")
 
     # Add player to the game
     cursor.execute("INSERT INTO game_player VALUES (?, ?, 1, '')", game_name, number)
