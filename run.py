@@ -1,7 +1,12 @@
+#!/usr/bin/env python2.7
 from flask import Flask, request, redirect
 import twilio.twiml
+import config
 
 app = Flask(__name__)
+
+conn = sqlite3.connect(config.db_filename)
+cursor = conn.cursor()
 
 players = {}
 games = {}
