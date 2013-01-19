@@ -2,6 +2,8 @@
 from flask import Flask, request, redirect
 import twilio.twiml
 import config
+import sqlite3
+import os
 
 app = Flask(__name__)
 
@@ -21,5 +23,7 @@ def register():
   return str(resp)
 
 if __name__ == "__main__":
+  conn = sqlite3.connect(config.db_filename)
+  cursor = conn.cursor()
   app.debug = True
   app.run(host='0.0.0.0')
