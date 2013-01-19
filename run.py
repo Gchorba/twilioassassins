@@ -1,7 +1,14 @@
+#!/usr/bin/env python2.7
 from flask import Flask, request, redirect
 import twilio.twiml
+import config
+import sqlite3
+import os
 
 app = Flask(__name__)
+
+conn = sqlite3.connect(config.db_filename)
+cursor = conn.cursor()
 
 players = {}
 games = {}
@@ -37,5 +44,7 @@ def join_game(number, game_name):
   return True
 
 if __name__ == "__main__":
+  conn = sqlite3.connect(config.db_filename)
+  cursor = conn.cursor()
   app.debug = True
   app.run(host='0.0.0.0')
